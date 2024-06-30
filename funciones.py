@@ -1,4 +1,5 @@
 import csv
+import operator
 from configuraciones import *
 
 # Define la clase Jugador que hereda de pygame.sprite.Sprite
@@ -132,4 +133,16 @@ def guardar_puntuacion(puntuacion):
         writer = csv.DictWriter(archivo, fieldnames=["Puntuación"])
         if archivo.tell() == 0:
             writer.writeheader()
+        writer.writerows(datos)
+
+    # Leer y ordenar el archivo CSV
+    with open(ruta_archivo, "r") as archivo:
+        reader = csv.DictReader(archivo)
+        datos = [row for row in reader]
+        datos.sort(key=operator.itemgetter("Puntuación"), reverse=True)
+
+    # Sobreescribir el archivo CSV con los datos ordenados
+    with open(ruta_archivo, "w", newline="") as archivo:
+        writer = csv.DictWriter(archivo, fieldnames=["Puntuación"])
+        writer.writeheader()
         writer.writerows(datos)
