@@ -1,7 +1,9 @@
 import csv
 from configuraciones import *
 
+# Define la clase Jugador que hereda de pygame.sprite.Sprite
 class Jugador(pygame.sprite.Sprite):
+    # Inicializa el jugador con la imagen, posición, velocidad y otras propiedades
     def __init__(self, juego):
         super().__init__()
         self.image = imagen_jugador
@@ -15,6 +17,7 @@ class Jugador(pygame.sprite.Sprite):
         self.doble_disparo = False
         self.tiempo_power_up = 0
 
+    # Actualiza la posición del jugador y maneja el disparo y los power-ups
     def update(self):
         teclas = pygame.key.get_pressed()
         if teclas[pygame.K_LEFT]:
@@ -40,6 +43,7 @@ class Jugador(pygame.sprite.Sprite):
             if tiempo_actual > self.tiempo_power_up:
                 self.doble_disparo = False
 
+    # Dispara una bala o dos si tiene el power-up de doble disparo
     def disparar(self):
         if self.doble_disparo:
             bala1 = Bala(self.rect.centerx - 15, self.rect.top)
@@ -54,12 +58,15 @@ class Jugador(pygame.sprite.Sprite):
             self.juego.balas.add(bala)
         sonido_disparo.play()
 
+    # Recoge un power-up y activa su efecto
     def recoger(self, power_up):
         if power_up.tipo == "doble_disparo":
             self.doble_disparo = True
             self.tiempo_power_up = pygame.time.get_ticks() + power_up.duracion
 
+# Define la clase Enemigo que hereda de pygame.sprite.Sprite
 class Enemigo(pygame.sprite.Sprite):
+    # Inicializa el enemigo con la imagen, posición, velocidad y juego
     def __init__(self, juego):
         super().__init__()
         self.image = imagen_enemigo
@@ -69,6 +76,7 @@ class Enemigo(pygame.sprite.Sprite):
         self.velocidad = 1
         self.juego = juego
 
+    # Actualiza la posición del enemigo y resta una vida al jugador si llega al fondo
     def update(self):
         self.rect.y += self.velocidad
         if self.rect.y == (RECTANGULO_AREA_JUEGO.bottom - 40):
@@ -79,7 +87,9 @@ class Enemigo(pygame.sprite.Sprite):
         if not RECTANGULO_AREA_JUEGO.contains(self.rect):
             self.rect.clamp_ip(RECTANGULO_AREA_JUEGO)
 
+# Define la clase Bala que hereda de pygame.sprite.Sprite
 class Bala(pygame.sprite.Sprite):
+    # Inicializa la bala con la imagen, posición y velocidad
     def __init__(self, x, y):
         super().__init__()
         self.image = imagen_bala
@@ -88,12 +98,15 @@ class Bala(pygame.sprite.Sprite):
         self.rect.y = y
         self.velocidad = 5
 
+    # Actualiza la posición de la bala y la elimina si sale de la pantalla
     def update(self):
         self.rect.y -= self.velocidad
         if self.rect.y < 0:
             self.kill()
 
+# Define la clase PowerUp que hereda de pygame.sprite.Sprite
 class PowerUp(pygame.sprite.Sprite):
+    # Inicializa el power-up con la imagen, posición, velocidad, tipo y duración
     def __init__(self, juego):
         super().__init__()
         self.image = imagen_power_up
@@ -105,12 +118,13 @@ class PowerUp(pygame.sprite.Sprite):
         self.tipo = "doble_disparo"
         self.duracion = 5000  # 5 segundos
 
+    # Actualiza la posición del power-up y lo elimina si sale de la pantalla
     def update(self):
         self.rect.y += self.velocidad
         if self.rect.y > RECTANGULO_AREA_JUEGO.bottom:
             self.kill()
 
-
+# Define la función para guardar la puntuación en un archivo CSV
 def guardar_puntuacion(puntuacion):
     ruta_archivo = "./Juego Parcial 2/puntuacion.csv"
     datos = [{"Puntuación": puntuacion}]
