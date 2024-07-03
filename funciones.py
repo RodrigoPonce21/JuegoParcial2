@@ -1,131 +1,137 @@
+import pygame
+import random
 import csv
 import operator
 from configuraciones import *
 
-# Define la clase Jugador que hereda de pygame.sprite.Sprite
-class Jugador(pygame.sprite.Sprite):
-    # Inicializa el jugador con la imagen, posición, velocidad y otras propiedades
-    def __init__(self, juego):
-        super().__init__()
-        self.image = imagen_jugador
-        self.rect = self.image.get_rect()
-        self.rect.centerx = RECTANGULO_AREA_JUEGO.centerx
-        self.rect.centery = RECTANGULO_AREA_JUEGO.bottom - 50
-        self.velocidad = 5
-        self.juego = juego
-        self.puede_disparar = True
-        self.tiempo_disparo = 0
-        self.doble_disparo = False
-        self.tiempo_power_up = 0
+def inicializar_jugador():
+    jugador = {
+        "image": imagen_jugador,
+        "rect": imagen_jugador.get_rect(),
+        "velocidad": 5,
+        "puede_disparar": True,
+        "tiempo_disparo": 0,
+        "doble_disparo": False,
+        "tiempo_power_up": 0
+    }
+    jugador["rect"].centerx = RECTANGULO_AREA_JUEGO.centerx
+    jugador["rect"].centery = RECTANGULO_AREA_JUEGO.bottom - 50
+    return jugador
 
-    # Actualiza la posición del jugador y maneja el disparo y los power-ups
-    def update(self):
-        teclas = pygame.key.get_pressed()
-        if teclas[pygame.K_LEFT]:
-            self.rect.x -= self.velocidad
-        if teclas[pygame.K_RIGHT]:
-            self.rect.x += self.velocidad
-        if teclas[pygame.K_SPACE] and self.puede_disparar:
-            self.disparar()
-            self.puede_disparar = False
-            self.tiempo_disparo = pygame.time.get_ticks()
+def crear_enemigo():
+    enemigo = {
+        "image": imagen_enemigo,
+        "rect": imagen_enemigo.get_rect(),
+        "velocidad": 1
+    }
+    enemigo["rect"].x = random.randint(RECTANGULO_AREA_JUEGO.left, RECTANGULO_AREA_JUEGO.right - TAMANO_ENEMIGO)
+    enemigo["rect"].y = random.randint(-100, -10)
+    return enemigo
 
-        # Verificar si el jugador se sale del rectángulo de límite
-        if not RECTANGULO_AREA_JUEGO.contains(self.rect):
-            self.rect.clamp_ip(RECTANGULO_AREA_JUEGO)
+def crear_bala(x, y):
+    bala = {
+        "image": imagen_bala,
+        "rect": imagen_bala.get_rect(),
+        "velocidad": 5
+    }
+    bala["rect"].x = x
+    bala["rect"].y = y
+    return bala
 
-        # Verificar si ha pasado el tiempo de disparo
-        tiempo_actual = pygame.time.get_ticks()
-        if tiempo_actual - self.tiempo_disparo >= 500:  # 500 ms = 0.5 seg
-            self.puede_disparar = True
+def crear_power_up():
+    power_up = {
+        "image": imagen_power_up,
+        "rect": imagen_power_up.get_rect(),
+        "velocidad": 2,
+        "tipo": "doble_disparo",
+        "duracion": 5000  # 5 segundos
+    }
+    power_up["rect"].x = random.randint(RECTANGULO_AREA_JUEGO.left, RECTANGULO_AREA_JUEGO.right - 20)
+    power_up["rect"].y = random.randint(-100, -10)
+    return power_up
 
-        # Verificar si ha pasado el tiempo del power up
-        if self.doble_disparo:
-            if tiempo_actual > self.tiempo_power_up:
-                self.doble_disparo = False
+def actualizar_jugador(jugador, all_sprites, balas):
+    teclas = pygame.key.get_pressed()
+    if teclas[pygame.K_LEFT]:
+        jugador["rect"].x -= jugador["velocidad"]
+    if teclas[pygame.K_RIGHT]:
+        jugador["rect"].x += jugador["velocidad"]
+    if teclas[pygame.K_SPACE] and jugador["puede_disparar"]:
+        disparar(jugador, all_sprites, balas)
+        jugador["puede_disparar"] = False
+        jugador["tiempo_disparo"] = pygame.time.get_ticks()
 
-    # Dispara una bala o dos si tiene el power-up de doble disparo
-    def disparar(self):
-        if self.doble_disparo:
-            bala1 = Bala(self.rect.centerx - 15, self.rect.top)
-            bala2 = Bala(self.rect.centerx + 15, self.rect.top)
-            self.juego.all_sprites.add(bala1)
-            self.juego.all_sprites.add(bala2)
-            self.juego.balas.add(bala1)
-            self.juego.balas.add(bala2)
-        else:
-            bala = Bala(self.rect.centerx, self.rect.top)
-            self.juego.all_sprites.add(bala)
-            self.juego.balas.add(bala)
-        sonido_disparo.play()
+    if not RECTANGULO_AREA_JUEGO.contains(jugador["rect"]):
+        jugador["rect"].clamp_ip(RECTANGULO_AREA_JUEGO)
 
-    # Recoge un power-up y activa su efecto
-    def recoger(self, power_up):
-        if power_up.tipo == "doble_disparo":
-            self.doble_disparo = True
-            self.tiempo_power_up = pygame.time.get_ticks() + power_up.duracion
+    tiempo_actual = pygame.time.get_ticks()
+    if tiempo_actual - jugador["tiempo_disparo"] >= 500:
+        jugador["puede_disparar"] = True
 
-# Define la clase Enemigo que hereda de pygame.sprite.Sprite
-class Enemigo(pygame.sprite.Sprite):
-    # Inicializa el enemigo con la imagen, posición, velocidad y juego
-    def __init__(self, juego):
-        super().__init__()
-        self.image = imagen_enemigo
-        self.rect = self.image.get_rect()
-        self.rect.x = random.randint(RECTANGULO_AREA_JUEGO.left, RECTANGULO_AREA_JUEGO.right - TAMANO_ENEMIGO)
-        self.rect.y = random.randint(-100, -10)
-        self.velocidad = 1
-        self.juego = juego
+    if jugador["doble_disparo"] and tiempo_actual > jugador["tiempo_power_up"]:
+        jugador["doble_disparo"] = False
 
-    # Actualiza la posición del enemigo y resta una vida al jugador si llega al fondo
-    def update(self):
-        self.rect.y += self.velocidad
-        if self.rect.y == (RECTANGULO_AREA_JUEGO.bottom - 40):
-            self.juego.vidas -= 1  # Restar una vida al jugador
-            self.kill() # Eliminar el enemigo
+def disparar(jugador, all_sprites, balas):
+    if jugador["doble_disparo"]:
+        bala1 = crear_bala(jugador["rect"].centerx - 15, jugador["rect"].top)
+        bala2 = crear_bala(jugador["rect"].centerx + 15, jugador["rect"].top)
+        all_sprites.append(bala1)
+        all_sprites.append(bala2)
+        balas.append(bala1)
+        balas.append(bala2)
+    else:
+        bala = crear_bala(jugador["rect"].centerx, jugador["rect"].top)
+        all_sprites.append(bala)
+        balas.append(bala)
+    sonido_disparo.play()
 
-        # Verificar si el enemigo se sale del rectángulo de límite
-        if not RECTANGULO_AREA_JUEGO.contains(self.rect):
-            self.rect.clamp_ip(RECTANGULO_AREA_JUEGO)
+def actualizar_enemigo(enemigo, juego):
+    enemigo["rect"].y += enemigo["velocidad"]
+    if enemigo["rect"].y >= RECTANGULO_AREA_JUEGO.bottom - 40:
+        juego["vidas"] -= 1
+        return False
+    if not RECTANGULO_AREA_JUEGO.contains(enemigo["rect"]):
+        enemigo["rect"].clamp_ip(RECTANGULO_AREA_JUEGO)
+    return True
 
-# Define la clase Bala que hereda de pygame.sprite.Sprite
-class Bala(pygame.sprite.Sprite):
-    # Inicializa la bala con la imagen, posición y velocidad
-    def __init__(self, x, y):
-        super().__init__()
-        self.image = imagen_bala
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.velocidad = 5
+def actualizar_bala(bala):
+    bala["rect"].y -= bala["velocidad"]
+    if bala["rect"].y < 0:
+        return False
+    return True
 
-    # Actualiza la posición de la bala y la elimina si sale de la pantalla
-    def update(self):
-        self.rect.y -= self.velocidad
-        if self.rect.y < 0:
-            self.kill()
+def actualizar_power_up(power_up):
+    power_up["rect"].y += power_up["velocidad"]
+    if power_up["rect"].y > RECTANGULO_AREA_JUEGO.bottom:
+        return False
+    return True
 
-# Define la clase PowerUp que hereda de pygame.sprite.Sprite
-class PowerUp(pygame.sprite.Sprite):
-    # Inicializa el power-up con la imagen, posición, velocidad, tipo y duración
-    def __init__(self, juego):
-        super().__init__()
-        self.image = imagen_power_up
-        self.rect = self.image.get_rect()
-        self.rect.x = random.randint(RECTANGULO_AREA_JUEGO.left, RECTANGULO_AREA_JUEGO.right - 20)
-        self.rect.y = random.randint(-100, -10)
-        self.velocidad = 2
-        self.juego = juego
-        self.tipo = "doble_disparo"
-        self.duracion = 5000  # 5 segundos
+def recoger_power_up(jugador, power_up):
+    if power_up["tipo"] == "doble_disparo":
+        jugador["doble_disparo"] = True
+        jugador["tiempo_power_up"] = pygame.time.get_ticks() + power_up["duracion"]
+        
+def mostrar_puntuacion(puntuacion):
+    fuente = pygame.font.SysFont(None, 36)
+    texto = fuente.render(f"Puntuación: {puntuacion}", True, BLANCO)
+    pantalla.blit(texto, (10, 10))
+    
+def mostrar_vida(vida):
+    fuente = pygame.font.SysFont(None, 36)
+    texto = fuente.render(f"Vidas: {vida}", True, BLANCO)
+    pantalla.blit(texto, (10, 50))
 
-    # Actualiza la posición del power-up y lo elimina si sale de la pantalla
-    def update(self):
-        self.rect.y += self.velocidad
-        if self.rect.y > RECTANGULO_AREA_JUEGO.bottom:
-            self.kill()
+def mostrar_pantalla_game_over(juego):
+    pantalla.fill(NEGRO)
+    fuente = pygame.font.SysFont(None, 72)
+    texto = fuente.render("GAME OVER", True, BLANCO)
+    pantalla.blit(texto, (ANCHO_PANTALLA / 2 - texto.get_width() / 2, ALTO_PANTALLA / 2 - texto.get_height() / 2))
+    fuente_pequena = pygame.font.SysFont(None, 36)
+    texto_puntuacion = fuente_pequena.render(f"Puntuación: {juego['puntuacion']}", True, BLANCO)
+    pantalla.blit(texto_puntuacion, (ANCHO_PANTALLA / 2 - texto_puntuacion.get_width() / 2, ALTO_PANTALLA / 2 + texto.get_height() / 2))
+    pygame.display.flip()
+    pygame.time.wait(3000)
 
-# Define la función para guardar la puntuación en un archivo CSV
 def guardar_puntuacion(puntuacion):
     ruta_archivo = "./Juego Parcial 2/puntuacion.csv"
     datos = [{"Puntuación": puntuacion}]
@@ -135,7 +141,6 @@ def guardar_puntuacion(puntuacion):
             writer.writeheader()
         writer.writerows(datos)
 
-    # Leer y ordenar el archivo CSV
     with open(ruta_archivo, "r") as archivo:
         reader = csv.DictReader(archivo)
         datos = [row for row in reader]

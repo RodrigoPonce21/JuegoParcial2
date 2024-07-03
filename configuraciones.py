@@ -1,5 +1,4 @@
 import pygame
-import sys
 import random
 
 # Constantes
@@ -39,10 +38,6 @@ fondo_menu_principal = pygame.transform.scale(fondo_menu_principal, (ANCHO_PANTA
 sonido_disparo = pygame.mixer.Sound("./Juego Parcial 2/disparo.mp3")
 sonido_explosion = pygame.mixer.Sound("./Juego Parcial 2/explosion.mp3")
 sonido_menu = pygame.mixer.Sound("./Juego Parcial 2/background_music.wav")
-
-# Cargar música de fondo (reemplazar con música real)
-#pygame.mixer.music.load("")
-#pygame.mixer.music.play(-1)
 
 # Definir el rectángulo de límite
 ANCHO_AREA_JUEGO = 360

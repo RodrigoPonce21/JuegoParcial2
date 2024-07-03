@@ -1,197 +1,141 @@
 import pygame
-from configuraciones import *  # Importa las configuraciones del juego
-from funciones import *  # Importa las funciones del juego
+import sys
+import random
+from configuraciones import *
+from funciones import *
 
-# Define la clase Juego
-class Juego:
-    # Inicializa el objeto Juego
-    def __init__(self):
-        # Inicializa los grupos de sprites
-        self.all_sprites = pygame.sprite.Group()
-        self.enemigos = pygame.sprite.Group()
-        self.balas = pygame.sprite.Group()
-        self.power_ups = pygame.sprite.Group()
+def main():
+    velocidad_caida = mostrar_menu_principal()
+    
+    jugador = inicializar_jugador()
+    all_sprites = [jugador]
+    enemigos = []
+    balas = []
+    power_ups = []
+    juego = {"vidas": 3, "puntuacion": 0}
 
-        # Inicializa las variables del juego
-        self.vidas = 3
-        self.puntuacion = 0
-        self.tiempo_enemigo = 0  # Temporizador para el respawn de enemigos
-        self.tiempo_power_up = 0  # Temporizador para el respawn de power-ups
-        self.menu = True  # Bandera para mostrar el menú
-        self.velocidad_enemigo = 1  # Velocidad inicial de los enemigos
+    # Temporizador para el power-up
+    tiempo_siguiente_power_up = pygame.time.get_ticks() + 15000  # 10 segundos
 
-    # Inicia el juego
-    def start(self):
-        # Crea el jugador
-        self.jugador = Jugador(self)
-        # Añade el jugador al grupo de sprites
-        self.all_sprites.add(self.jugador)
+    corriendo = True
+    while corriendo:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                corriendo = False
 
-        # Crea enemigos iniciales
-        for _ in range(5):
-            enemigo = Enemigo(self)
-            # Actualiza la velocidad de los enemigos
-            enemigo.velocidad = self.velocidad_enemigo 
-            # Añade los enemigos al grupo de sprites
-            self.all_sprites.add(enemigo)
-            self.enemigos.add(enemigo)
+        actualizar_jugador(jugador, all_sprites, balas)
 
-    # Actualiza el juego
-    def update(self):
-        # Actualiza los sprites
-        self.all_sprites.update()
+        for bala in list(balas):
+            if not actualizar_bala(bala):
+                balas.remove(bala)
+                all_sprites.remove(bala)
 
-        # Comprueba colisiones entre balas y enemigos
-        golpes = pygame.sprite.groupcollide(self.enemigos, self.balas, True, True)
-        # Si hay colisiones, aumenta la puntuación y reproduce un sonido
-        for golpe in golpes:
-            self.puntuacion += 1
-            sonido_explosion.play()
+        if random.random() < 0.02:
+            enemigo = crear_enemigo()
+            enemigo["velocidad"] = velocidad_caida
+            enemigos.append(enemigo)
+            all_sprites.append(enemigo)
 
-        # Comprueba colisiones entre el jugador y enemigos
-        golpes = pygame.sprite.spritecollide(self.jugador, self.enemigos, True)
-        # Si hay colisiones, resta una vida y reproduce un sonido
-        for golpe in golpes:
-            self.vidas -= 1
-            sonido_explosion.play()
+        for enemigo in list(enemigos):
+            if not actualizar_enemigo(enemigo, juego):
+                enemigos.remove(enemigo)
+                all_sprites.remove(enemigo)
+                if juego["vidas"] <= 0:
+                    corriendo = False
+                    mostrar_pantalla_game_over(juego)
 
-        # Comprueba colisiones entre el jugador y power-ups
-        golpes = pygame.sprite.spritecollide(self.jugador, self.power_ups, True)
-        # Si hay colisiones, el jugador recoge el power-up
-        for golpe in golpes:
-            self.jugador.recoger(golpe)
+        # Comprobar si es momento de generar un nuevo power-up
+        tiempo_actual = pygame.time.get_ticks()
+        if tiempo_actual >= tiempo_siguiente_power_up:
+            power_up = crear_power_up()
+            power_ups.append(power_up)
+            all_sprites.append(power_up)
+            tiempo_siguiente_power_up = tiempo_actual + 10000  # 10 segundos
 
-        # Game Over si el jugador se queda sin vidas
-        if self.vidas <= 0:
-            self.game_over()
+        for power_up in list(power_ups):
+            if not actualizar_power_up(power_up):
+                power_ups.remove(power_up)
+                all_sprites.remove(power_up)
+            elif jugador["rect"].colliderect(power_up["rect"]):
+                recoger_power_up(jugador, power_up)
+                power_ups.remove(power_up)
+                all_sprites.remove(power_up)
 
-        # Respawn de enemigos
-        self.tiempo_enemigo -= 1
-        if self.tiempo_enemigo <= 0:
-            # Respawn cada X frames
-            self.tiempo_enemigo = 25
-            # Limita la cantidad de enemigos en pantalla
-            if len(self.enemigos) < 7: 
-                enemigo = Enemigo(self)
-                # Actualiza la velocidad de los enemigos
-                enemigo.velocidad = self.velocidad_enemigo 
-                # Añade el nuevo enemigo al grupo de sprites
-                self.all_sprites.add(enemigo)
-                self.enemigos.add(enemigo)
+        for enemigo in list(enemigos):
+            if jugador["rect"].colliderect(enemigo["rect"]):
+                sonido_explosion.play()
+                juego["vidas"] -= 1
+                enemigos.remove(enemigo)
+                all_sprites.remove(enemigo)
+                if juego["vidas"] <= 0:
+                    corriendo = False
+                    mostrar_pantalla_game_over(juego)
 
-        # Respawn de power-ups
-        self.tiempo_power_up -= 1
-        if self.tiempo_power_up <= 0:
-            # Respawn cada X frames
-            self.tiempo_power_up = 200
-            # Limita la cantidad de power-ups en pantalla
-            if len(self.power_ups) < 1:
-                power_up = PowerUp(self)
-                # Añade el nuevo power-up al grupo de sprites
-                self.all_sprites.add(power_up)
-                self.power_ups.add(power_up)
+        for bala in list(balas):
+            for enemigo in list(enemigos):
+                if bala["rect"].colliderect(enemigo["rect"]):
+                    sonido_explosion.play()
+                    juego["puntuacion"] += 100
+                    balas.remove(bala)
+                    enemigos.remove(enemigo)
+                    all_sprites.remove(bala)
+                    all_sprites.remove(enemigo)
+                    break
 
-    # Dibuja el juego
-    def draw(self):
-        # Rellena la pantalla con negro
         pantalla.fill(NEGRO)
-        # Dibuja el rectángulo del área de juego
-        pygame.draw.rect(pantalla, BLANCO, RECTANGULO_AREA_JUEGO, 1)
-        # Dibuja los sprites
-        self.all_sprites.draw(pantalla)
+        pygame.draw.rect(pantalla, BLANCO, RECTANGULO_AREA_JUEGO, 2)
+        for sprite in all_sprites:
+            pantalla.blit(sprite["image"], sprite["rect"])
 
-        # Dibuja las vidas y la puntuación
-        fuente = pygame.font.Font(None, 36)
-        texto = fuente.render(f"Vidas: {self.vidas} ", True, BLANCO)
-        texto2 = fuente.render(f"Puntuación: {self.puntuacion} ", True, BLANCO)
-        pantalla.blit(texto, (10, 10))
-        pantalla.blit(texto2, (10, 40))
-
-        # Actualiza la pantalla
+        mostrar_puntuacion(juego["puntuacion"])
+        mostrar_vida(juego["vidas"])
         pygame.display.flip()
+        reloj.tick(60)
 
-    # Ejecuta el juego
-    def run(self):
-        # Bandera para el sonido del menú
-        bandera = 0    
-        # Bucle del menú principal
-        while self.menu:
-            # Maneja los eventos
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == pygame.KEYDOWN:
-                    # Ajusta la velocidad de los enemigos con las flechas
-                    if event.key == pygame.K_UP:
-                        self.velocidad_enemigo = min(self.velocidad_enemigo + 0.5, 5)
-                        for enemigo in self.enemigos:
-                            enemigo.velocidad = self.velocidad_enemigo
-                    elif event.key == pygame.K_DOWN:
-                        self.velocidad_enemigo = max(self.velocidad_enemigo - 0.5, 0.5)
-                        for enemigo in self.enemigos:
-                            enemigo.velocidad = self.velocidad_enemigo
-                    # Inicia el juego si se presiona Enter
-                    elif event.key == pygame.K_RETURN:
-                        self.menu = False
-                        self.start()
+    pygame.quit()
+    guardar_puntuacion(juego["puntuacion"])
 
-            # Reproduce el sonido del menú una vez
-            if bandera == 0:
-                sonido_menu.play()
-                bandera = 1
+def mostrar_menu_principal():
+    pantalla.blit(fondo_menu_principal, (0, 0))
+    fuente = pygame.font.SysFont(None, 62)
+    texto = fuente.render("Seleccione la velocidad de caída", True, BLANCO)
+    pantalla.blit(texto, (ANCHO_PANTALLA / 2 - texto.get_width() / 2, 100))
+    
+    fuente_pequena = pygame.font.SysFont(None, 36)
+    opciones = ["1", "2", "3", "4", "5"]
+    seleccion = 0
+    espacio_entre_opciones = 50
+
+    bandera_musica = 0
+    
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    seleccion = (seleccion - 1) % len(opciones)
+                elif event.key == pygame.K_RIGHT:
+                    seleccion = (seleccion + 1) % len(opciones)
+                elif event.key == pygame.K_RETURN:
+                    return int(opciones[seleccion])
+
+        pantalla.blit(fondo_menu_principal, (0, 0))
+        pantalla.blit(texto, (ANCHO_PANTALLA / 2 - texto.get_width() / 2, 100))
+
+        for i, opcion in enumerate(opciones):
+            color = BLANCO if i == seleccion else NEGRO
+            texto_opcion = fuente_pequena.render(opcion, True, color)
+            x_pos = ANCHO_PANTALLA / 2 - (len(opciones) * espacio_entre_opciones) / 2 + i * espacio_entre_opciones
+            pantalla.blit(texto_opcion, (x_pos, 200))
             
-            # Dibuja el menú principal
-            pantalla.blit(fondo_menu_principal, (0, 0))
-            fuente = pygame.font.Font(None, 30)
-            texto2 = fuente.render("Presiona Enter para empezar", True, BLANCO)
-            pantalla.blit(texto2, (ANCHO_PANTALLA / 2 - 150, ALTO_PANTALLA / 3 - 50))
-            texto3 = fuente.render("Usa las flechas arriba y abajo para ajustar la velocidad de los enemigos", True, BLANCO)
-            pantalla.blit(texto3, (ANCHO_PANTALLA / 3 - 200, ALTO_PANTALLA / 3))
-            texto = fuente.render(f"Velocidad de los enemigos: {int(self.velocidad_enemigo)}", True, BLANCO)
-            pantalla.blit(texto, (ANCHO_PANTALLA / 2 - 150, ALTO_PANTALLA / 3 + 50))
-            # Actualiza la pantalla
-            pygame.display.update()
-            pygame.display.flip()
-        
-        # Bucle del juego principal
-        while True:
-            # Maneja los eventos
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-
-            # Actualiza y dibuja el juego
-            self.update()
-            self.draw()
-
-            # Limita la frecuencia de fotogramas
-            reloj.tick(60)
-
-    # Game Over
-    def game_over(self):
-        # Dibuja la pantalla de Game Over
-        pantalla.fill(NEGRO)
-        fuente = pygame.font.Font(None, 64)
-        texto = fuente.render("JUEGO TERMINADO", True, BLANCO)
-        pantalla.blit(texto, (ANCHO_PANTALLA / 2 - 150, ALTO_PANTALLA / 2 - 50))
-        texto = fuente.render(f"Puntuación: {self.puntuacion}", True, BLANCO)
-        pantalla.blit(texto, (ANCHO_PANTALLA / 2 - 150, ALTO_PANTALLA / 2 + 50))
+        if bandera_musica == 0:
+            bandera_musica = 1
+            sonido_menu.play()
+            
         pygame.display.flip()
-        
-        # Guarda la puntuación en un archivo
-        guardar_puntuacion(self.puntuacion)
-        
-        # Bucle de la pantalla de Game Over
-        while True:
-            # Maneja los eventos
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+        reloj.tick(60)
 
-# Ejecuta el juego si el script se ejecuta directamente
 if __name__ == "__main__":
-    juego = Juego()
-    juego.run()
+    main()
