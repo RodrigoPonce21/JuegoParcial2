@@ -49,7 +49,7 @@ def main():
             power_up = crear_power_up()
             power_ups.append(power_up)
             all_sprites.append(power_up)
-            tiempo_siguiente_power_up = tiempo_actual + 15000  # 15 segundos
+            tiempo_siguiente_power_up = tiempo_actual + 25000  # 15 segundos
 
         for power_up in list(power_ups):
             if not actualizar_power_up(power_up):
