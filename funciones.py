@@ -169,27 +169,32 @@ def mostrar_pantalla_game_over(juego):
     texto = fuente.render("GAME OVER", True, BLANCO)
     pantalla.blit(texto, (ANCHO_PANTALLA / 2 - texto.get_width() / 2, ALTO_PANTALLA / 2 - texto.get_height() / 2))
     fuente_pequena = pygame.font.SysFont(None, 36)
-    texto_puntuacion = fuente_pequena.render(f"Puntuación: {juego['puntuacion']}", True, BLANCO)
+    texto_puntuacion = fuente_pequena.render(f"Puntuacion: {juego['puntuacion']}", True, BLANCO)
     pantalla.blit(texto_puntuacion, (ANCHO_PANTALLA / 2 - texto_puntuacion.get_width() / 2, ALTO_PANTALLA / 2 + texto.get_height() / 2))
     pygame.display.flip()
     pygame.time.wait(3000)
 
 def guardar_puntuacion(puntuacion):
     ruta_archivo = "./Juego Parcial 2/puntuacion.csv"
-    datos = [{"Puntuación": puntuacion}]
+    datos = [{"Puntuacion": puntuacion}]
+    
+    # Guardar la nueva puntuación
     with open(ruta_archivo, "a", newline="") as archivo:
-        writer = csv.DictWriter(archivo, fieldnames=["Puntuación"])
+        writer = csv.DictWriter(archivo, fieldnames=["Puntuacion"])
         if archivo.tell() == 0:
             writer.writeheader()
         writer.writerows(datos)
 
+    # Leer todas las puntuaciones del archivo
     with open(ruta_archivo, "r") as archivo:
         reader = csv.DictReader(archivo)
         datos = [row for row in reader]
-        datos.sort(key=operator.itemgetter("Puntuación"), reverse=True)
+
+    # Ordenar las puntuaciones de mayor a menor
+    datos.sort(key=lambda x: int(x["Puntuacion"]), reverse=True)
 
     # Sobreescribir el archivo CSV con los datos ordenados
     with open(ruta_archivo, "w", newline="") as archivo:
-        writer = csv.DictWriter(archivo, fieldnames=["Puntuación"])
+        writer = csv.DictWriter(archivo, fieldnames=["Puntuacion"])
         writer.writeheader()
         writer.writerows(datos)

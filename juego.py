@@ -14,7 +14,7 @@ def main():
     juego = {"vidas": 3, "puntuacion": 0}
 
     # Temporizador para el power-up
-    tiempo_siguiente_power_up = pygame.time.get_ticks() + 15000  # 10 segundos
+    tiempo_siguiente_power_up = pygame.time.get_ticks() + 15000  # 15 segundos
 
     corriendo = True
     while corriendo:
@@ -49,7 +49,7 @@ def main():
             power_up = crear_power_up()
             power_ups.append(power_up)
             all_sprites.append(power_up)
-            tiempo_siguiente_power_up = tiempo_actual + 10000  # 10 segundos
+            tiempo_siguiente_power_up = tiempo_actual + 15000  # 15 segundos
 
         for power_up in list(power_ups):
             if not actualizar_power_up(power_up):
