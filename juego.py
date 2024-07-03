@@ -1,5 +1,4 @@
 import pygame
-import sys
 import random
 from configuraciones import *
 from funciones import *
@@ -94,48 +93,6 @@ def main():
 
     pygame.quit()
     guardar_puntuacion(juego["puntuacion"])
-
-def mostrar_menu_principal():
-    pantalla.blit(fondo_menu_principal, (0, 0))
-    fuente = pygame.font.SysFont(None, 62)
-    texto = fuente.render("Seleccione la velocidad de caída", True, BLANCO)
-    pantalla.blit(texto, (ANCHO_PANTALLA / 2 - texto.get_width() / 2, 100))
-    
-    fuente_pequena = pygame.font.SysFont(None, 36)
-    opciones = ["1", "2", "3", "4", "5"]
-    seleccion = 0
-    espacio_entre_opciones = 50
-
-    bandera_musica = 0
-    
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    seleccion = (seleccion - 1) % len(opciones)
-                elif event.key == pygame.K_RIGHT:
-                    seleccion = (seleccion + 1) % len(opciones)
-                elif event.key == pygame.K_RETURN:
-                    return int(opciones[seleccion])
-
-        pantalla.blit(fondo_menu_principal, (0, 0))
-        pantalla.blit(texto, (ANCHO_PANTALLA / 2 - texto.get_width() / 2, 100))
-
-        for i, opcion in enumerate(opciones):
-            color = BLANCO if i == seleccion else NEGRO
-            texto_opcion = fuente_pequena.render(opcion, True, color)
-            x_pos = ANCHO_PANTALLA / 2 - (len(opciones) * espacio_entre_opciones) / 2 + i * espacio_entre_opciones
-            pantalla.blit(texto_opcion, (x_pos, 200))
-            
-        if bandera_musica == 0:
-            bandera_musica = 1
-            sonido_menu.play()
-            
-        pygame.display.flip()
-        reloj.tick(60)
 
 if __name__ == "__main__":
     main()
