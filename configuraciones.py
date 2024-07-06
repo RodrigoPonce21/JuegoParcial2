@@ -2,8 +2,8 @@ import pygame
 import random
 
 # Constantes
-ANCHO_PANTALLA = 800
-ALTO_PANTALLA = 600
+ANCHO_PANTALLA = 600
+ALTO_PANTALLA = 700
 TAMANO_JUGADOR = 25
 TAMANO_ENEMIGO = 25
 TAMANO_BALA = 5
@@ -11,6 +11,7 @@ TAMANO_BALA = 5
 # Colores
 BLANCO = (255, 255, 255)
 NEGRO = (0, 0, 0)
+ROJO = (255, 0, 0)
 
 # Inicializar Pygame
 pygame.init()
@@ -33,6 +34,9 @@ imagen_power_up.fill(BLANCO)
 
 fondo_menu_principal = pygame.image.load("./Juego Parcial 2/main_menu_background.png")
 fondo_menu_principal = pygame.transform.scale(fondo_menu_principal, (ANCHO_PANTALLA, ALTO_PANTALLA))
+
+fondo_juego = pygame.image.load("./Juego Parcial 2/game_background.png")
+fondo_juego = pygame.transform.scale(fondo_juego, (ANCHO_PANTALLA, ALTO_PANTALLA))
 
 # Cargar sonidos (reemplazar con sonidos reales)
 sonido_disparo = pygame.mixer.Sound("./Juego Parcial 2/disparo.mp3")

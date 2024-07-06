@@ -36,6 +36,7 @@ def main():
             all_sprites.append(enemigo)
 
         for enemigo in list(enemigos):
+            mover_enemigo(enemigo)
             if not actualizar_enemigo(enemigo, juego):
                 enemigos.remove(enemigo)
                 all_sprites.remove(enemigo)
@@ -81,7 +82,7 @@ def main():
                     all_sprites.remove(enemigo)
                     break
 
-        pantalla.fill(NEGRO)
+        pantalla.blit(fondo_juego, (0, 0))
         pygame.draw.rect(pantalla, BLANCO, RECTANGULO_AREA_JUEGO, 2)
         for sprite in all_sprites:
             pantalla.blit(sprite["image"], sprite["rect"])

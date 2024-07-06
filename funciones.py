@@ -1,7 +1,6 @@
 import pygame
 import random
 import csv
-import operator
 from configuraciones import *
 
 def inicializar_jugador():
@@ -22,11 +21,22 @@ def crear_enemigo():
     enemigo = {
         "image": imagen_enemigo,
         "rect": imagen_enemigo.get_rect(),
-        "velocidad": 1
+        "velocidad": 1,
+        "direccion": random.randint(-1, 1)  # 1 para moverse hacia la derecha, -1 para moverse hacia la izquierda
     }
     enemigo["rect"].x = random.randint(RECTANGULO_AREA_JUEGO.left, RECTANGULO_AREA_JUEGO.right - TAMANO_ENEMIGO)
     enemigo["rect"].y = random.randint(-100, -10)
     return enemigo
+
+def mover_enemigo(enemigo):
+    # Mover en la dirección actual
+    enemigo["rect"].x += enemigo["velocidad"] * enemigo["direccion"]
+
+    # Verificar si alcanza los límites izquierdo o derecho
+    if enemigo["rect"].right >= RECTANGULO_AREA_JUEGO.right:
+        enemigo["direccion"] = -1  # Cambiar dirección hacia la izquierda
+    elif enemigo["rect"].left <= RECTANGULO_AREA_JUEGO.left:
+        enemigo["direccion"] = 1  # Cambiar dirección hacia la derecha
 
 def crear_bala(x, y):
     bala = {
@@ -112,20 +122,23 @@ def recoger_power_up(jugador, power_up):
         jugador["tiempo_power_up"] = pygame.time.get_ticks() + power_up["duracion"]
         
 def mostrar_puntuacion(puntuacion):
-    fuente = pygame.font.SysFont(None, 36)
-    texto = fuente.render(f"Puntuación: {puntuacion}", True, BLANCO)
-    pantalla.blit(texto, (10, 10))
+    fuente = pygame.font.SysFont(None, 30)
+    texto = fuente.render(f"Puntuación", True, ROJO)
+    texto2 = fuente.render(str(puntuacion), True, BLANCO)
+    pantalla.blit(texto, (250, 10))
+    pantalla.blit(texto2, (300, 35))
     
 def mostrar_vida(vida):
-    fuente = pygame.font.SysFont(None, 36)
-    texto = fuente.render(f"Vidas: {vida}", True, BLANCO)
-    pantalla.blit(texto, (10, 50))
+    fuente = pygame.font.SysFont(None, 30)
+    texto = fuente.render(f"Vidas", True, ROJO)
+    texto2 = fuente.render(str(vida), True, BLANCO)
+    pantalla.blit(texto, (10, 10))
+    pantalla.blit(texto2, (10, 35))
     
 def mostrar_menu_principal():
     pantalla.blit(fondo_menu_principal, (0, 0))
-    fuente = pygame.font.SysFont(None, 62)
+    fuente = pygame.font.SysFont(None, 32)
     texto = fuente.render("Seleccione la velocidad de caída", True, BLANCO)
-    pantalla.blit(texto, (ANCHO_PANTALLA / 2 - texto.get_width() / 2, 100))
     
     fuente_pequena = pygame.font.SysFont(None, 36)
     opciones = ["1", "2", "3", "4", "5"]
@@ -148,7 +161,7 @@ def mostrar_menu_principal():
                     return int(opciones[seleccion])
 
         pantalla.blit(fondo_menu_principal, (0, 0))
-        pantalla.blit(texto, (ANCHO_PANTALLA / 2 - texto.get_width() / 2, 100))
+        pantalla.blit(texto, (ANCHO_PANTALLA / 2 - texto.get_width() / 2, 150))
 
         for i, opcion in enumerate(opciones):
             color = BLANCO if i == seleccion else NEGRO
@@ -175,26 +188,27 @@ def mostrar_pantalla_game_over(juego):
     pygame.time.wait(3000)
 
 def guardar_puntuacion(puntuacion):
-    ruta_archivo = "./Juego Parcial 2/puntuacion.csv"
-    datos = [{"Puntuacion": puntuacion}]
-    
-    # Guardar la nueva puntuación
-    with open(ruta_archivo, "a", newline="") as archivo:
-        writer = csv.DictWriter(archivo, fieldnames=["Puntuacion"])
-        if archivo.tell() == 0:
+    if puntuacion != 0:
+        ruta_archivo = "./Juego Parcial 2/puntuacion.csv"
+        datos = [{"Puntuacion": puntuacion}]
+        
+        # Guardar la nueva puntuación
+        with open(ruta_archivo, "a", newline="") as archivo:
+            writer = csv.DictWriter(archivo, fieldnames=["Puntuacion"])
+            if archivo.tell() == 0:
+                writer.writeheader()
+            writer.writerows(datos)
+
+        # Leer todas las puntuaciones del archivo
+        with open(ruta_archivo, "r") as archivo:
+            reader = csv.DictReader(archivo)
+            datos = [row for row in reader]
+
+        # Ordenar las puntuaciones de mayor a menor
+        datos.sort(key=lambda x: int(x["Puntuacion"]), reverse=True)
+
+        # Sobreescribir el archivo CSV con los datos ordenados
+        with open(ruta_archivo, "w", newline="") as archivo:
+            writer = csv.DictWriter(archivo, fieldnames=["Puntuacion"])
             writer.writeheader()
-        writer.writerows(datos)
-
-    # Leer todas las puntuaciones del archivo
-    with open(ruta_archivo, "r") as archivo:
-        reader = csv.DictReader(archivo)
-        datos = [row for row in reader]
-
-    # Ordenar las puntuaciones de mayor a menor
-    datos.sort(key=lambda x: int(x["Puntuacion"]), reverse=True)
-
-    # Sobreescribir el archivo CSV con los datos ordenados
-    with open(ruta_archivo, "w", newline="") as archivo:
-        writer = csv.DictWriter(archivo, fieldnames=["Puntuacion"])
-        writer.writeheader()
-        writer.writerows(datos)
+            writer.writerows(datos)
