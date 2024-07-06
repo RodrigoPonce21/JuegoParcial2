@@ -25,7 +25,7 @@ def crear_enemigo():
         "direccion": random.randint(-1, 1)  # 1 para moverse hacia la derecha, -1 para moverse hacia la izquierda
     }
     enemigo["rect"].x = random.randint(RECTANGULO_AREA_JUEGO.left, RECTANGULO_AREA_JUEGO.right - TAMANO_ENEMIGO)
-    enemigo["rect"].y = random.randint(-100, -10)
+    enemigo["rect"].y = RECTANGULO_AREA_JUEGO.top
     return enemigo
 
 def mover_enemigo(enemigo):
@@ -57,7 +57,7 @@ def crear_power_up():
         "duracion": 5000  # 5 segundos
     }
     power_up["rect"].x = random.randint(RECTANGULO_AREA_JUEGO.left, RECTANGULO_AREA_JUEGO.right - 20)
-    power_up["rect"].y = random.randint(-100, -10)
+    power_up["rect"].y = RECTANGULO_AREA_JUEGO.top
     return power_up
 
 def actualizar_jugador(jugador, all_sprites, balas):
