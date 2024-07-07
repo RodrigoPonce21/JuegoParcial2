@@ -23,7 +23,7 @@ pygame.display.set_caption("Galaga")
 reloj = pygame.time.Clock()
 
 # Leer el archivo JSON
-with open("./JuegoParcial2-main/archivos.json", 'r') as file:
+with open("./archivos.json", 'r') as file:
     ubicacion = json.load(file)
 
 # Cargar imágenes

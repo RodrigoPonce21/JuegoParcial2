@@ -1,14 +1,14 @@
 {
     "imagenes": {
-        "jugador": "./JuegoParcial2-main/archivos/jugador.png",
-        "enemigo": "./JuegoParcial2-main/archivos/enemigo.png",
-        "power-up": "./JuegoParcial2-main/archivos/power-up.png",
-        "main_menu_background": "./JuegoParcial2-main/archivos/main_menu_background.png",
-        "game_background": "./JuegoParcial2-main/archivos/game_background.png"
+        "jugador": "./archivos/jugador.png",
+        "enemigo": "./archivos/enemigo.png",
+        "power-up": "./archivos/power-up.png",
+        "main_menu_background": "./archivos/main_menu_background.png",
+        "game_background": "./archivos/game_background.png"
     },
     "sonidos": {
-        "disparo": "./JuegoParcial2-main/archivos/disparo.mp3",
-        "explosion": "./JuegoParcial2-main/archivos/explosion.mp3",
-        "menu_background": "./JuegoParcial2-main/archivos/background_music.wav"
+        "disparo": "./archivos/disparo.mp3",
+        "explosion": "./archivos/explosion.mp3",
+        "menu_background": "./archivos/background_music.wav"
     }
 }
