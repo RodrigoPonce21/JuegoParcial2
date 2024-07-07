@@ -10,6 +10,7 @@ ALTO_AREA_JUEGO = 580
 TAMAÑO_JUGADOR = 25
 TAMAÑO_ENEMIGO = 25
 TAMAÑO_BALA = 5
+TAMAÑO_POWERUP = 30
 
 # Colores
 BLANCO = (255, 255, 255)
@@ -36,8 +37,8 @@ imagen_enemigo = pygame.transform.scale(imagen_enemigo, (TAMAÑO_ENEMIGO, TAMAÑ
 imagen_bala = pygame.Surface((TAMAÑO_BALA, TAMAÑO_BALA))
 imagen_bala.fill(BLANCO)
 
-imagen_power_up = pygame.Surface((20, 20))
-imagen_power_up.fill(BLANCO)
+imagen_power_up = pygame.image.load(ubicacion["imagenes"]["power-up"])
+imagen_power_up = pygame.transform.scale(imagen_power_up, (TAMAÑO_POWERUP, TAMAÑO_POWERUP))
 
 fondo_menu_principal = pygame.image.load(ubicacion["imagenes"]["main_menu_background"])
 fondo_menu_principal = pygame.transform.scale(fondo_menu_principal, (ANCHO_PANTALLA, ALTO_PANTALLA))
