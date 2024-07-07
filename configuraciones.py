@@ -1,5 +1,4 @@
 import pygame
-import random
 import json
 
 # Constantes
@@ -24,7 +23,7 @@ pygame.display.set_caption("Galaga")
 reloj = pygame.time.Clock()
 
 # Leer el archivo JSON
-with open('./Juego Parcial 2/archivos.json', 'r') as file:
+with open("./JuegoParcial2-main/archivos.json", 'r') as file:
     ubicacion = json.load(file)
 
 # Cargar imágenes
