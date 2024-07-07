@@ -1,0 +1,13 @@
+{
+    "imagenes": {
+        "jugador": "./Juego Parcial 2/archivos/jugador.png",
+        "enemigo": "./Juego Parcial 2/archivos/enemigo.png",
+        "main_menu_background": "./Juego Parcial 2/archivos/main_menu_background.png",
+        "game_background": "./Juego Parcial 2/archivos/game_background.png"
+    },
+    "sonidos": {
+        "disparo": "./Juego Parcial 2/archivos/disparo.mp3",
+        "explosion": "./Juego Parcial 2/archivos/explosion.mp3",
+        "menu_background": "./Juego Parcial 2/archivos/background_music.wav"
+    }
+}

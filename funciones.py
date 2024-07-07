@@ -24,7 +24,7 @@ def crear_enemigo():
         "velocidad": 1,
         "direccion": random.randint(-1, 1)  # 1 para moverse hacia la derecha, -1 para moverse hacia la izquierda
     }
-    enemigo["rect"].x = random.randint(RECTANGULO_AREA_JUEGO.left, RECTANGULO_AREA_JUEGO.right - TAMANO_ENEMIGO)
+    enemigo["rect"].x = random.randint(RECTANGULO_AREA_JUEGO.left, RECTANGULO_AREA_JUEGO.right - TAMAÑO_ENEMIGO)
     enemigo["rect"].y = RECTANGULO_AREA_JUEGO.top
     return enemigo
 
