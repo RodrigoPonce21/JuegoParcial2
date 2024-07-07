@@ -52,5 +52,3 @@ sonido_menu = pygame.mixer.Sound(ubicacion["sonidos"]["menu_background"])
 
 # Definir el rectángulo de límite
 RECTANGULO_AREA_JUEGO = pygame.Rect(ANCHO_PANTALLA / 2 - ANCHO_AREA_JUEGO / 2, ALTO_PANTALLA / 2 - ALTO_AREA_JUEGO / 2, ANCHO_AREA_JUEGO, ALTO_AREA_JUEGO)
-
-# Resto del código del juego...
