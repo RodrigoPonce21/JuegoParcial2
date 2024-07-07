@@ -3,6 +3,7 @@ import random
 import csv
 from configuraciones import *
 
+# Inicializar el jugador con sus atributos
 def inicializar_jugador():
     jugador = {
         "image": imagen_jugador,
@@ -17,6 +18,7 @@ def inicializar_jugador():
     jugador["rect"].centery = RECTANGULO_AREA_JUEGO.bottom - 50
     return jugador
 
+# Crear un nuevo enemigo con sus atributos
 def crear_enemigo():
     enemigo = {
         "image": imagen_enemigo,
@@ -28,16 +30,17 @@ def crear_enemigo():
     enemigo["rect"].y = RECTANGULO_AREA_JUEGO.top
     return enemigo
 
+# Mover el enemigo en su dirección actual
 def mover_enemigo(enemigo):
-    # Mover en la dirección actual
     enemigo["rect"].x += enemigo["velocidad"] * enemigo["direccion"]
 
-    # Verificar si alcanza los límites izquierdo o derecho
+    # Cambiar la dirección si el enemigo alcanza los límites
     if enemigo["rect"].right >= RECTANGULO_AREA_JUEGO.right:
         enemigo["direccion"] = -1  # Cambiar dirección hacia la izquierda
     elif enemigo["rect"].left <= RECTANGULO_AREA_JUEGO.left:
         enemigo["direccion"] = 1  # Cambiar dirección hacia la derecha
 
+# Crear una nueva bala
 def crear_bala(x, y):
     bala = {
         "image": imagen_bala,
@@ -48,6 +51,7 @@ def crear_bala(x, y):
     bala["rect"].y = y
     return bala
 
+# Crear un nuevo power-up
 def crear_power_up():
     power_up = {
         "image": imagen_power_up,
@@ -60,6 +64,7 @@ def crear_power_up():
     power_up["rect"].y = RECTANGULO_AREA_JUEGO.top
     return power_up
 
+# Actualizar la posición del jugador
 def actualizar_jugador(jugador, all_sprites, balas):
     teclas = pygame.key.get_pressed()
     if teclas[pygame.K_LEFT]:
@@ -71,16 +76,20 @@ def actualizar_jugador(jugador, all_sprites, balas):
         jugador["puede_disparar"] = False
         jugador["tiempo_disparo"] = pygame.time.get_ticks()
 
+    # Mantener al jugador dentro del área de juego
     if not RECTANGULO_AREA_JUEGO.contains(jugador["rect"]):
         jugador["rect"].clamp_ip(RECTANGULO_AREA_JUEGO)
 
+    # Controlar el tiempo entre disparos
     tiempo_actual = pygame.time.get_ticks()
     if tiempo_actual - jugador["tiempo_disparo"] >= 500:
         jugador["puede_disparar"] = True
 
+    # Controlar la duración del power-up
     if jugador["doble_disparo"] and tiempo_actual > jugador["tiempo_power_up"]:
         jugador["doble_disparo"] = False
 
+# Disparar una bala
 def disparar(jugador, all_sprites, balas):
     if jugador["doble_disparo"]:
         bala1 = crear_bala(jugador["rect"].centerx - 15, jugador["rect"].top)
@@ -95,6 +104,7 @@ def disparar(jugador, all_sprites, balas):
         balas.append(bala)
     sonido_disparo.play()
 
+# Actualizar la posición del enemigo
 def actualizar_enemigo(enemigo, juego):
     enemigo["rect"].y += enemigo["velocidad"]
     if enemigo["rect"].y >= RECTANGULO_AREA_JUEGO.bottom - 40:
@@ -104,23 +114,27 @@ def actualizar_enemigo(enemigo, juego):
         enemigo["rect"].clamp_ip(RECTANGULO_AREA_JUEGO)
     return True
 
+# Actualizar la posición de la bala
 def actualizar_bala(bala):
     bala["rect"].y -= bala["velocidad"]
     if bala["rect"].y < 0:
         return False
     return True
 
+# Actualizar la posición del power-up
 def actualizar_power_up(power_up):
     power_up["rect"].y += power_up["velocidad"]
     if power_up["rect"].y > RECTANGULO_AREA_JUEGO.bottom:
         return False
     return True
 
+# Recoger el power-up y aplicar sus efectos
 def recoger_power_up(jugador, power_up):
     if power_up["tipo"] == "doble_disparo":
         jugador["doble_disparo"] = True
         jugador["tiempo_power_up"] = pygame.time.get_ticks() + power_up["duracion"]
         
+# Mostrar la puntuación en la pantalla
 def mostrar_puntuacion(puntuacion):
     fuente = pygame.font.SysFont(None, 30)
     texto = fuente.render(f"Puntuación", True, ROJO)
@@ -128,13 +142,15 @@ def mostrar_puntuacion(puntuacion):
     pantalla.blit(texto, (250, 10))
     pantalla.blit(texto2, (300, 35))
     
+# Mostrar las vidas en la pantalla
 def mostrar_vida(vida):
     fuente = pygame.font.SysFont(None, 30)
     texto = fuente.render(f"Vidas", True, ROJO)
     texto2 = fuente.render(str(vida), True, BLANCO)
     pantalla.blit(texto, (10, 10))
     pantalla.blit(texto2, (10, 35))
-    
+
+# Mostrar el menú principal y seleccionar la velocidad de caída
 def mostrar_menu_principal():
     pantalla.blit(fondo_menu_principal, (0, 0))
     fuente = pygame.font.SysFont(None, 32)
@@ -176,6 +192,7 @@ def mostrar_menu_principal():
         pygame.display.flip()
         reloj.tick(60)
 
+# Mostrar la pantalla de game over
 def mostrar_pantalla_game_over(juego):
     pantalla.fill(NEGRO)
     fuente = pygame.font.SysFont(None, 72)
@@ -187,6 +204,7 @@ def mostrar_pantalla_game_over(juego):
     pygame.display.flip()
     pygame.time.wait(3000)
 
+# Guardar la puntuación en un archivo CSV
 def guardar_puntuacion(puntuacion):
     if puntuacion != 0:
         ruta_archivo = "./Juego Parcial 2/puntuacion.csv"
