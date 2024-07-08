@@ -4,7 +4,8 @@
         "enemigo": "./archivos/enemigo.png",
         "power-up": "./archivos/power-up.png",
         "main_menu_background": "./archivos/main_menu_background.png",
-        "game_background": "./archivos/game_background.png"
+        "game_background": "./archivos/game_background.png",
+        "corazon": "./archivos/corazon.png"
     },
     "sonidos": {
         "disparo": "./archivos/disparo.mp3",

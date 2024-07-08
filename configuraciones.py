@@ -39,6 +39,9 @@ imagen_bala.fill(BLANCO)
 imagen_power_up = pygame.image.load(ubicacion["imagenes"]["power-up"])
 imagen_power_up = pygame.transform.scale(imagen_power_up, (TAMAÑO_POWERUP, TAMAÑO_POWERUP))
 
+imagen_corazon = pygame.image.load(ubicacion["imagenes"]["corazon"])
+imagen_corazon = pygame.transform.scale(imagen_corazon, (30, 30))
+
 fondo_menu_principal = pygame.image.load(ubicacion["imagenes"]["main_menu_background"])
 fondo_menu_principal = pygame.transform.scale(fondo_menu_principal, (ANCHO_PANTALLA, ALTO_PANTALLA))
 
