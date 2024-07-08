@@ -210,23 +210,43 @@ def guardar_puntuacion(puntuacion):
         ruta_archivo = "./Juego Parcial 2/puntuacion.csv"
         datos = [{"Puntuacion": puntuacion}]
         
-        # Guardar la nueva puntuación
-        with open(ruta_archivo, "a", newline="") as archivo:
-            writer = csv.DictWriter(archivo, fieldnames=["Puntuacion"])
-            if archivo.tell() == 0:
+        try:
+            # Guardar la nueva puntuación
+            with open(ruta_archivo, "a", newline="") as archivo:
+                writer = csv.DictWriter(archivo, fieldnames=["Puntuacion"])
+                if archivo.tell() == 0:
+                    writer.writeheader()
+                writer.writerows(datos)
+        except IOError:
+            print("Error al guardar la puntuación en el archivo CSV.")
+            return
+
+        try:
+            # Leer todas las puntuaciones del archivo
+            with open(ruta_archivo, "r") as archivo:
+                reader = csv.DictReader(archivo)
+                datos = [row for row in reader]
+        except IOError:
+            print("Error al leer el archivo CSV de puntuaciones.")
+            return
+        except csv.Error:
+            print("Error al procesar el archivo CSV de puntuaciones.")
+            return
+
+        try:
+            # Ordenar las puntuaciones de mayor a menor
+            datos.sort(key=lambda x: int(x["Puntuacion"]), reverse=True)
+        except ValueError:
+            print("Error al convertir la puntuación a entero.")
+            return
+
+        try:
+            # Sobreescribir el archivo CSV con los datos ordenados
+            with open(ruta_archivo, "w", newline="") as archivo:
+                writer = csv.DictWriter(archivo, fieldnames=["Puntuacion"])
                 writer.writeheader()
-            writer.writerows(datos)
+                writer.writerows(datos)
+        except IOError:
+            print("Error al guardar las puntuaciones ordenadas en el archivo CSV.")
+            return
 
-        # Leer todas las puntuaciones del archivo
-        with open(ruta_archivo, "r") as archivo:
-            reader = csv.DictReader(archivo)
-            datos = [row for row in reader]
-
-        # Ordenar las puntuaciones de mayor a menor
-        datos.sort(key=lambda x: int(x["Puntuacion"]), reverse=True)
-
-        # Sobreescribir el archivo CSV con los datos ordenados
-        with open(ruta_archivo, "w", newline="") as archivo:
-            writer = csv.DictWriter(archivo, fieldnames=["Puntuacion"])
-            writer.writeheader()
-            writer.writerows(datos)
