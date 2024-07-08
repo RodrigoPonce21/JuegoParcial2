@@ -101,6 +101,7 @@ def main():
         # Mostrar la puntuación y las vidas
         mostrar_puntuacion(juego["puntuacion"])
         mostrar_vida(juego["vidas"])
+        
         pygame.display.flip()
         reloj.tick(60)
 
